@@ -16,6 +16,12 @@ jobs:
             if [ -f "$z" ]; then unzip -oq "$z" -d unzipped; fi
           done
 
+      - name: Ap ban va
+        run: |
+          APP=$(find unzipped -path "*/app/build.gradle.kts" | head -n1)
+          ROOT=$(dirname "$(dirname "$APP")")
+          if [ -d patch ]; then cp -r patch/. "$ROOT/"; fi
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
