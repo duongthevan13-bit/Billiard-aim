@@ -1,0 +1,40 @@
+name: Build debug APK
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Giai nen ma nguon
+        run: |
+          for z in ./*.zip; do
+            if [ -f "$z" ]; then unzip -oq "$z" -d unzipped; fi
+          done
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.9
+
+      - name: Build debug APK
+        run: |
+          APP=$(find . -path "*/app/build.gradle.kts" -not -path "*/build/*" | head -n1)
+          if [ -z "$APP" ]; then echo "Khong tim thay thu muc app"; exit 1; fi
+          cd "$(dirname "$(dirname "$APP")")"
+          gradle :app:assembleDebug --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BilliardAim-debug-apk
+          path: "**/build/outputs/apk/debug/*.apk"
